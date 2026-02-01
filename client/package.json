@@ -1,0 +1,36 @@
+{
+    "name": "safe-exam-client",
+    "version": "1.0.0",
+    "description": "Safe Browser for Proctored Exams - Client",
+    "main": "src/main/main.js",
+    "scripts": {
+        "start": "electron .",
+        "dev": "electron . --dev",
+        "build": "electron-builder",
+        "build:win": "electron-builder --win"
+    },
+    "build": {
+        "appId": "edu.college.safeexambrowser",
+        "productName": "Safe Exam Browser",
+        "directories": {
+            "output": "dist"
+        },
+        "win": {
+            "target": "nsis",
+            "icon": "assets/icon.ico"
+        },
+        "nsis": {
+            "oneClick": false,
+            "perMachine": true,
+            "allowToChangeInstallationDirectory": false
+        }
+    },
+    "dependencies": {
+        "axios": "^1.6.5",
+        "uuid": "^9.0.0"
+    },
+    "devDependencies": {
+        "electron": "^28.1.0",
+        "electron-builder": "^24.9.1"
+    }
+}

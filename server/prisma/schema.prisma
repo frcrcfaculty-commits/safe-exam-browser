@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         String   @default("PROFESSOR")
+  department   String?
+  rollNumber   String?  @unique @map("roll_number")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  exams        Exam[]
+  sessions     Session[]
+  
+  @@map("users")
+}
+
+model Exam {
+  id          String   @id @default(uuid())
+  examCode    String   @unique @map("exam_code")
+  title       String
+  description String?
+  durationMin Int      @map("duration_min")
+  status      String   @default("DRAFT")
+  template    String   @default("mcq")
+  professorId String   @map("professor_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  professor   User       @relation(fields: [professorId], references: [id])
+  questions   Question[]
+  sessions    Session[]
+  
+  @@map("exams")
+}
+
+model Question {
+  id         String   @id @default(uuid())
+  examId     String   @map("exam_id")
+  text       String
+  optionsJson String  @map("options_json")
+  correctIdx Int      @map("correct_idx")
+  order      Int
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  exam       Exam       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  responses  Response[]
+  
+  @@map("questions")
+}
+
+model Device {
+  id         String    @id @default(uuid())
+  hostname   String    @unique
+  macAddress String?   @map("mac_address")
+  approved   Boolean   @default(false)
+  lastSeen   DateTime? @map("last_seen")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  
+  sessions   Session[]
+  
+  @@map("devices")
+}
+
+model Session {
+  id          String    @id @default(uuid())
+  examId      String    @map("exam_id")
+  deviceId    String?   @map("device_id")
+  userId      String?   @map("user_id")
+  rollNumber  String    @map("roll_number")
+  startedAt   DateTime  @default(now()) @map("started_at")
+  submittedAt DateTime? @map("submitted_at")
+  score       Int?
+  total       Int?
+  flagsJson   String    @default("[]") @map("flags_json")
+  
+  exam        Exam       @relation(fields: [examId], references: [id])
+  device      Device?    @relation(fields: [deviceId], references: [id])
+  user        User?      @relation(fields: [userId], references: [id])
+  responses   Response[]
+  events      EventLog[]
+  
+  @@unique([examId, rollNumber])
+  @@map("sessions")
+}
+
+model Response {
+  id          String   @id @default(uuid())
+  sessionId   String   @map("session_id")
+  questionId  String   @map("question_id")
+  selectedIdx Int?     @map("selected_idx")
+  timestamp   DateTime @default(now())
+  
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question    Question @relation(fields: [questionId], references: [id])
+  
+  @@unique([sessionId, questionId])
+  @@map("responses")
+}
+
+model EventLog {
+  id          String   @id @default(uuid())
+  sessionId   String   @map("session_id")
+  eventType   String   @map("event_type")
+  detailsJson String?  @map("details_json")
+  timestamp   DateTime @default(now())
+  
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@map("event_logs")
+}

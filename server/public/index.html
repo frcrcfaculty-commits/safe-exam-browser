@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Exam Browser - Dashboard</title>
+    <style>
+        :root {
+            --bg-warm-beige: #E6E2D7;
+            --bg-soft-mint: #CBD4B9;
+            --bg-sage: #A8AE9C;
+            --primary-blue: #689AD2;
+            --soft-purple: #D1ADD3;
+            --warm-orange: #E69559;
+            --gradient-primary: linear-gradient(135deg, #689AD2 0%, #D1ADD3 100%);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --radius-md: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-warm-beige);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 16px 32px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 1.25rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .navbar button {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        .badge-draft {
+            background: #ffeaa7;
+            color: #856404;
+        }
+
+        .badge-published {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-admin {
+            background: var(--warm-orange);
+            color: white;
+        }
+
+        .badge-student {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .exam-code {
+            font-family: monospace;
+            background: #eee;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: var(--radius-md);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            margin-right: 4px;
+            font-size: 0.85rem;
+            background: var(--bg-soft-mint);
+        }
+
+        .action-btn:hover {
+            background: var(--bg-sage);
+        }
+
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background: white;
+            padding: 48px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 24px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .success {
+            color: #27ae60;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, rgba(104, 154, 210, 0.1), rgba(209, 173, 211, 0.1));
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .role-btn.active {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, rgba(104, 154, 210, 0.15), rgba(209, 173, 211, 0.15));
+        }
+
+        .role-btn h4 {
+            margin-bottom: 4px;
+        }
+
+        .role-btn p {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .dept-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #A9C9D7;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .student-login-info {
+            background: linear-gradient(135deg, rgba(104, 154, 210, 0.1), rgba(209, 173, 211, 0.1));
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Login View -->
+    <div id="login-view" class="login-container">
+        <div class="login-card">
+            <h2>📝 Safe Exam Browser</h2>
+
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showAuthTab('login')">Login</button>
+                <button class="tab-btn" onclick="showAuthTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" required placeholder="your.email@college.edu">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%">Login</button>
+                <div id="login-error" class="error"></div>
+
+                <div class="student-login-info">
+                    <p><strong>Students:</strong> Login here, then use the <strong>Student Portal</strong> to join exams
+                        with your exam code.</p>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="hidden">
+                <div class="form-group">
+                    <label>I am a...</label>
+                    <div class="role-selector">
+                        <div class="role-btn active" onclick="selectRole('PROFESSOR')" id="role-professor">
+                            <h4>👨‍🏫 Faculty</h4>
+                            <p>Create & manage exams</p>
+                        </div>
+                        <div class="role-btn" onclick="selectRole('STUDENT')" id="role-student">
+                            <h4>👨‍🎓 Student</h4>
+                            <p>Take exams</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="reg-role" value="PROFESSOR">
+                </div>
+
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="reg-name" required placeholder="Dr. John Smith">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="reg-email" required placeholder="john.smith@college.edu">
+                </div>
+                <div class="form-group" id="roll-field" style="display:none">
+                    <label>Roll Number * (for students)</label>
+                    <input type="text" id="reg-roll" placeholder="e.g., CS2024001">
+                </div>
+                <div class="form-group">
+                    <label>Department * (Required)</label>
+                    <select id="reg-department" required>
+                        <option value="">-- Select Your Department --</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Electronics">Electronics & Communication</option>
+                        <option value="Electrical">Electrical Engineering</option>
+                        <option value="Mechanical">Mechanical Engineering</option>
+                        <option value="Civil">Civil Engineering</option>
+                        <option value="Chemical">Chemical Engineering</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Humanities">Humanities & Social Sciences</option>
+                        <option value="Management">Management Studies</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="reg-password" required placeholder="Min 6 characters" minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password *</label>
+                    <input type="password" id="reg-confirm" required placeholder="Repeat password">
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%">Create Account</button>
+                <div id="register-error" class="error"></div>
+                <div id="register-success" class="success"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Department Setup Modal -->
+    <div id="dept-modal" class="modal">
+        <div class="modal-content">
+            <div class="warning-box">
+                <h3>⚠️ Department Setup Required</h3>
+                <p>Please select your department before continuing.</p>
+            </div>
+            <form id="dept-form">
+                <div class="form-group">
+                    <label>Select Your Department *</label>
+                    <select id="setup-department" required>
+                        <option value="">-- Select Department --</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Electronics">Electronics & Communication</option>
+                        <option value="Electrical">Electrical Engineering</option>
+                        <option value="Mechanical">Mechanical Engineering</option>
+                        <option value="Civil">Civil Engineering</option>
+                        <option value="Chemical">Chemical Engineering</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Humanities">Humanities & Social Sciences</option>
+                        <option value="Management">Management Studies</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%">Save & Continue</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Professor/Admin Dashboard -->
+    <div id="dashboard-view" class="hidden">
+        <nav class="navbar">
+            <h1>📝 Safe Exam Browser</h1>
+            <div style="display:flex;align-items:center">
+                <span id="user-name"></span>
+                <span id="user-role" class="badge" style="margin-left:8px"></span>
+                <span id="user-dept" class="dept-badge"></span>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-draft">0</div>
+                    <div class="stat-label">Draft Exams</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-published">0</div>
+                    <div class="stat-label">Published</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-sessions">0</div>
+                    <div class="stat-label">Total Sessions</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>My Exams</h2>
+                    <button class="btn-primary" onclick="showCreateModal()">+ Create Exam</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Exam Code</th>
+                            <th>Title</th>
+                            <th>Questions</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Sessions</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exams-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Portal -->
+    <div id="student-view" class="hidden">
+        <nav class="navbar">
+            <h1>📝 Safe Exam Browser - Student Portal</h1>
+            <div style="display:flex;align-items:center">
+                <span id="student-name"></span>
+                <span class="badge badge-student">Student</span>
+                <span id="student-dept" class="dept-badge"></span>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="card">
+                <h2 style="margin-bottom:20px">Join Exam</h2>
+                <div class="info-box">
+                    <p><strong>Enter your exam code</strong> provided by your professor to start the exam.</p>
+                </div>
+                <form id="join-exam-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Exam Code</label>
+                            <input type="text" id="join-code" required placeholder="e.g., ABC123"
+                                style="text-transform:uppercase;font-family:monospace;font-size:1.5rem;text-align:center;letter-spacing:4px">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Find Exam</button>
+                    <div id="join-error" class="error"></div>
+                </form>
+
+                <div id="exam-preview" class="hidden"
+                    style="margin-top:24px;padding:20px;background:#f8f9fa;border-radius:8px">
+                    <h3 id="preview-title"></h3>
+                    <p id="preview-desc" style="color:#666;margin:8px 0"></p>
+                    <p><strong>Duration:</strong> <span id="preview-duration"></span> minutes |
+                        <strong>Questions:</strong> <span id="preview-questions"></span>
+                    </p>
+                    <button class="btn-primary" style="margin-top:16px" onclick="startStudentExam()">Start Exam</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Exam Modal -->
+    <div id="create-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:20px">Create New Exam</h2>
+            <form id="exam-form">
+                <div class="form-group"><label>Title</label><input type="text" id="exam-title" required></div>
+                <div class="form-group"><label>Description</label><textarea id="exam-desc" rows="2"></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Duration (minutes)</label><input type="number" id="exam-duration"
+                            value="60" min="5" max="180"></div>
+                    <div class="form-group"><label>Template</label><select id="exam-template">
+                            <option value="mcq">MCQ (Multiple Choice)</option>
+                        </select></div>
+                </div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px">
+                    <button type="button" class="btn-secondary" onclick="hideCreateModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Create Exam</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Questions Modal -->
+    <div id="questions-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:20px">Add Questions</h2>
+            <div id="questions-list"></div>
+            <button class="btn-secondary" onclick="addQuestionField()" style="margin:12px 0">+ Add Question</button>
+            <div style="display:flex;gap:12px;justify-content:flex-end">
+                <button class="btn-secondary" onclick="hideQuestionsModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveQuestions()">Save Questions</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monitor Modal -->
+    <div id="monitor-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:20px">Live Monitor <span id="monitor-code" class="exam-code"></span></h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Status</th>
+                        <th>Time Left</th>
+                        <th>Flags</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="monitor-table"></tbody>
+            </table>
+            <div style="text-align:right;margin-top:16px"><button class="btn-secondary"
+                    onclick="hideMonitorModal()">Close</button></div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3001/api';
+        let token = localStorage.getItem('token');
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        let currentExamId = null;
+        let selectedExam = null;
+
+        async function api(url, opts = {}) {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const res = await fetch(API + url, { ...opts, headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+            if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+            return res.json();
+        }
+
+        // Role selection for registration
+        function selectRole(role) {
+            document.getElementById('reg-role').value = role;
+            document.getElementById('role-professor').classList.toggle('active', role === 'PROFESSOR');
+            document.getElementById('role-student').classList.toggle('active', role === 'STUDENT');
+            document.getElementById('roll-field').style.display = role === 'STUDENT' ? 'block' : 'none';
+            document.getElementById('reg-roll').required = role === 'STUDENT';
+        }
+
+        function showAuthTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+            });
+            document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+            document.getElementById('login-error').textContent = '';
+            document.getElementById('register-error').textContent = '';
+            document.getElementById('register-success').textContent = '';
+        }
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await api('/auth/login', {
+                    method: 'POST',
+                    body: { email: document.getElementById('login-email').value, password: document.getElementById('login-password').value }
+                });
+                token = res.token;
+                localStorage.setItem('token', token);
+                currentUser = res.user;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                if (!currentUser.department) {
+                    document.getElementById('dept-modal').classList.add('active');
+                } else {
+                    showDashboard();
+                }
+            } catch (err) { document.getElementById('login-error').textContent = err.message; }
+        });
+
+        // Register
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-confirm').value;
+            const role = document.getElementById('reg-role').value;
+
+            if (password !== confirm) {
+                document.getElementById('register-error').textContent = 'Passwords do not match';
+                return;
+            }
+
+            try {
+                const body = {
+                    name: document.getElementById('reg-name').value,
+                    email: document.getElementById('reg-email').value,
+                    password,
+                    department: document.getElementById('reg-department').value,
+                    role
+                };
+                if (role === 'STUDENT') {
+                    body.rollNumber = document.getElementById('reg-roll').value;
+                }
+
+                await api('/auth/register', { method: 'POST', body });
+                document.getElementById('register-error').textContent = '';
+                document.getElementById('register-success').textContent = 'Account created! You can now login.';
+                document.getElementById('register-form').reset();
+                selectRole('PROFESSOR');
+                setTimeout(() => showAuthTab('login'), 2000);
+            } catch (err) { document.getElementById('register-error').textContent = err.message; }
+        });
+
+        // Department setup
+        document.getElementById('dept-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await api('/auth/update-department', { method: 'PUT', body: { department: document.getElementById('setup-department').value } });
+                currentUser.department = document.getElementById('setup-department').value;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                document.getElementById('dept-modal').classList.remove('active');
+                showDashboard();
+            } catch (err) { alert(err.message); }
+        });
+
+        function showDashboard() {
+            document.getElementById('login-view').classList.add('hidden');
+
+            if (currentUser.role === 'STUDENT') {
+                document.getElementById('student-view').classList.remove('hidden');
+                document.getElementById('student-name').textContent = currentUser.name;
+                document.getElementById('student-dept').textContent = currentUser.department;
+            } else {
+                document.getElementById('dashboard-view').classList.remove('hidden');
+                document.getElementById('user-name').textContent = currentUser.name;
+                document.getElementById('user-role').textContent = currentUser.role;
+                document.getElementById('user-role').classList.add(currentUser.role === 'ADMIN' ? 'badge-admin' : 'badge-published');
+                document.getElementById('user-dept').textContent = currentUser.department;
+                loadExams();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('currentUser');
+            location.reload();
+        }
+
+        async function loadExams() {
+            try {
+                const res = await api('/exams');
+                const exams = res.exams || [];
+                document.getElementById('stat-draft').textContent = exams.filter(e => e.status === 'DRAFT').length;
+                document.getElementById('stat-published').textContent = exams.filter(e => e.status === 'PUBLISHED').length;
+                document.getElementById('stat-sessions').textContent = exams.reduce((s, e) => s + e.sessionCount, 0);
+                document.getElementById('exams-table').innerHTML = exams.map(e => `
+                    <tr>
+                        <td><span class="exam-code">${e.examCode}</span></td>
+                        <td>${e.title}</td>
+                        <td>${e.questionCount}</td>
+                        <td>${e.durationMin} min</td>
+                        <td><span class="badge badge-${e.status.toLowerCase()}">${e.status}</span></td>
+                        <td>${e.sessionCount}</td>
+                        <td>
+                            ${e.status === 'DRAFT' ? `<button class="action-btn" onclick="showQuestionsModal('${e.id}')">Add Q</button><button class="action-btn" onclick="publishExam('${e.id}')">Publish</button>` : ''}
+                            ${e.status === 'PUBLISHED' ? `<button class="action-btn" onclick="showMonitor('${e.id}', '${e.examCode}')">Monitor</button>` : ''}
+                            ${e.sessionCount > 0 ? `<button class="action-btn" onclick="exportResults('${e.id}')">Export</button>` : ''}
+                        </td>
+                    </tr>
+                `).join('') || '<tr><td colspan="7" style="text-align:center;color:#666">No exams yet</td></tr>';
+            } catch (err) { console.error(err); }
+        }
+
+        // Student join exam
+        document.getElementById('join-exam-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = document.getElementById('join-code').value.toUpperCase();
+            try {
+                selectedExam = await api(`/client/exam-by-code/${code}`);
+                document.getElementById('preview-title').textContent = selectedExam.title;
+                document.getElementById('preview-desc').textContent = selectedExam.description || '';
+                document.getElementById('preview-duration').textContent = selectedExam.durationMin;
+                document.getElementById('preview-questions').textContent = selectedExam.questionCount;
+                document.getElementById('exam-preview').classList.remove('hidden');
+                document.getElementById('join-error').textContent = '';
+            } catch (err) {
+                document.getElementById('join-error').textContent = err.message;
+                document.getElementById('exam-preview').classList.add('hidden');
+            }
+        });
+
+        async function startStudentExam() {
+            if (!selectedExam) return;
+            try {
+                const res = await api('/client/start', { method: 'POST', body: { examCode: selectedExam.examCode, rollNumber: currentUser.rollNumber } });
+                // Redirect to exam page (would open Electron client or web exam page)
+                alert(`Exam started! Session ID: ${res.sessionId}\n\nIn production, this would launch the secure exam browser.`);
+            } catch (err) { alert(err.message); }
+        }
+
+        function showCreateModal() { document.getElementById('create-modal').classList.add('active'); }
+        function hideCreateModal() { document.getElementById('create-modal').classList.remove('active'); }
+
+        document.getElementById('exam-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await api('/exams', {
+                    method: 'POST', body: {
+                        title: document.getElementById('exam-title').value,
+                        description: document.getElementById('exam-desc').value,
+                        durationMin: parseInt(document.getElementById('exam-duration').value),
+                        template: document.getElementById('exam-template').value
+                    }
+                });
+                hideCreateModal();
+                document.getElementById('exam-form').reset();
+                alert(`Exam created! Share this code with students: ${res.examCode}`);
+                loadExams();
+            } catch (err) { alert(err.message); }
+        });
+
+        function showQuestionsModal(examId) {
+            currentExamId = examId;
+            document.getElementById('questions-list').innerHTML = '';
+            addQuestionField();
+            document.getElementById('questions-modal').classList.add('active');
+        }
+        function hideQuestionsModal() { document.getElementById('questions-modal').classList.remove('active'); }
+
+        function addQuestionField() {
+            const n = document.getElementById('questions-list').children.length + 1;
+            document.getElementById('questions-list').innerHTML += `
+                <div class="question-card" style="border:2px solid #e0e0e0;padding:24px;border-radius:12px;margin-bottom:20px;background:#fafafa">
+                    <div class="form-group" style="margin-bottom:20px">
+                        <label style="font-size:1.1rem;font-weight:600;color:#333">Question ${n}</label>
+                        <textarea class="q-text" rows="2" required placeholder="Enter your question here..." style="margin-top:8px;resize:vertical"></textarea>
+                    </div>
+                    
+                    <div style="margin-bottom:20px">
+                        <label style="font-weight:600;color:#555;margin-bottom:12px;display:block">Answer Options</label>
+                        
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                            <span style="width:32px;height:32px;background:var(--primary-blue);color:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">A</span>
+                            <input class="q-opt" data-idx="0" placeholder="Option A" style="flex:1">
+                        </div>
+                        
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                            <span style="width:32px;height:32px;background:var(--soft-purple);color:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">B</span>
+                            <input class="q-opt" data-idx="1" placeholder="Option B" style="flex:1">
+                        </div>
+                        
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                            <span style="width:32px;height:32px;background:var(--warm-orange);color:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">C</span>
+                            <input class="q-opt" data-idx="2" placeholder="Option C" style="flex:1">
+                        </div>
+                        
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <span style="width:32px;height:32px;background:var(--bg-sage);color:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">D</span>
+                            <input class="q-opt" data-idx="3" placeholder="Option D" style="flex:1">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="background:linear-gradient(135deg, rgba(39,174,96,0.1), rgba(46,204,113,0.1));padding:16px;border-radius:8px;border:1px solid #27ae60">
+                        <label style="font-weight:600;color:#27ae60;margin-bottom:8px;display:block">✓ Correct Answer</label>
+                        <select class="q-correct" style="background:white">
+                            <option value="0">A</option>
+                            <option value="1">B</option>
+                            <option value="2">C</option>
+                            <option value="3">D</option>
+                        </select>
+                    </div>
+                </div>`;
+        }
+
+        async function saveQuestions() {
+            const list = document.getElementById('questions-list');
+            const questions = [];
+            list.querySelectorAll('.question-card').forEach(div => {
+                const text = div.querySelector('.q-text').value.trim();
+                const opts = Array.from(div.querySelectorAll('.q-opt')).map(i => i.value.trim());
+                const correct = parseInt(div.querySelector('.q-correct').value);
+                if (text && opts.every(o => o)) questions.push({ text, options: opts, correct_idx: correct });
+            });
+            try {
+                await api(`/exams/${currentExamId}/questions`, { method: 'POST', body: { questions } });
+                hideQuestionsModal(); loadExams();
+            } catch (err) { alert(err.message); }
+        }
+
+        async function publishExam(id) {
+            if (!confirm('Publish this exam? Students will be able to join using the exam code.')) return;
+            try {
+                const res = await api(`/exams/${id}/publish`, { method: 'PUT' });
+                alert(`Exam published! Share this code with students: ${res.examCode}`);
+                loadExams();
+            } catch (err) { alert(err.message); }
+        }
+
+        async function showMonitor(id, code) {
+            try {
+                const res = await api(`/exams/${id}/monitor`);
+                document.getElementById('monitor-code').textContent = code;
+                document.getElementById('monitor-table').innerHTML = res.sessions.map(s => `
+                    <tr><td>${s.rollNumber}</td><td>${s.status}</td><td>${s.remainingMin} min</td><td>${s.flags}</td><td>${s.score !== null ? s.score + '/' + s.total : '-'}</td></tr>
+                `).join('') || '<tr><td colspan="5">No sessions yet</td></tr>';
+                document.getElementById('monitor-modal').classList.add('active');
+            } catch (err) { alert(err.message); }
+        }
+        function hideMonitorModal() { document.getElementById('monitor-modal').classList.remove('active'); }
+
+        function exportResults(id) { window.open(API + `/exams/${id}/export?token=${token}`, '_blank'); }
+
+        // Auto-login
+        if (token && currentUser) {
+            if (!currentUser.department) {
+                document.getElementById('dept-modal').classList.add('active');
+            } else {
+                showDashboard();
+            }
+        }
+    </script>
+</body>
+
+</html>
