@@ -3,75 +3,80 @@ const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
-function generateExamCode() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-}
-
 async function main() {
-    console.log('🌱 Seeding database with comprehensive sample data...\n');
+    console.log('🌱 Seeding database with Fr. Agnel College sample data...\n');
 
     // =================================
-    // USERS - Admin, Professors, Students
+    // USERS - Admin, Faculty, Students
     // =================================
 
     // Admin
     const adminPassword = await bcrypt.hash('admin123', 10);
     const admin = await prisma.user.upsert({
-        where: { email: 'admin@college.edu' },
+        where: { email: 'admin@fragnel.edu.in' },
         update: {},
         create: {
-            email: 'admin@college.edu',
+            email: 'admin@fragnel.edu.in',
             passwordHash: adminPassword,
-            name: 'System Admin',
+            name: 'System Administrator',
             role: 'ADMIN',
             department: 'Administration'
         }
     });
     console.log('✓ Admin:', admin.email);
 
-    // Professors
-    const profPassword = await bcrypt.hash('prof123', 10);
+    // Faculty Members
+    const facPassword = await bcrypt.hash('faculty123', 10);
 
-    const profCS = await prisma.user.upsert({
-        where: { email: 'prof.sharma@college.edu' },
+    const faculty1 = await prisma.user.upsert({
+        where: { email: 'prof.dsilva@fragnel.edu.in' },
         update: {},
         create: {
-            email: 'prof.sharma@college.edu',
-            passwordHash: profPassword,
-            name: 'Dr. Anil Sharma',
+            email: 'prof.dsilva@fragnel.edu.in',
+            passwordHash: facPassword,
+            name: 'Dr. Maria D\'Silva',
             role: 'PROFESSOR',
             department: 'Computer Science'
         }
     });
-    console.log('✓ Professor:', profCS.email);
+    console.log('✓ Faculty:', faculty1.email);
 
-    const profMath = await prisma.user.upsert({
-        where: { email: 'prof.gupta@college.edu' },
+    const faculty2 = await prisma.user.upsert({
+        where: { email: 'prof.fernandes@fragnel.edu.in' },
         update: {},
         create: {
-            email: 'prof.gupta@college.edu',
-            passwordHash: profPassword,
-            name: 'Dr. Priya Gupta',
+            email: 'prof.fernandes@fragnel.edu.in',
+            passwordHash: facPassword,
+            name: 'Prof. Anthony Fernandes',
+            role: 'PROFESSOR',
+            department: 'Commerce'
+        }
+    });
+    console.log('✓ Faculty:', faculty2.email);
+
+    const faculty3 = await prisma.user.upsert({
+        where: { email: 'prof.naik@fragnel.edu.in' },
+        update: {},
+        create: {
+            email: 'prof.naik@fragnel.edu.in',
+            passwordHash: facPassword,
+            name: 'Prof. Sunita Naik',
             role: 'PROFESSOR',
             department: 'Mathematics'
         }
     });
-    console.log('✓ Professor:', profMath.email);
+    console.log('✓ Faculty:', faculty3.email);
 
     // Students
     const studentPassword = await bcrypt.hash('student123', 10);
 
     const students = [
-        { email: 'rahul.kumar@college.edu', name: 'Rahul Kumar', rollNumber: 'CS2024001', department: 'Computer Science' },
-        { email: 'priya.singh@college.edu', name: 'Priya Singh', rollNumber: 'CS2024002', department: 'Computer Science' },
-        { email: 'amit.patel@college.edu', name: 'Amit Patel', rollNumber: 'CS2024003', department: 'Computer Science' },
-        { email: 'sneha.verma@college.edu', name: 'Sneha Verma', rollNumber: 'CS2024004', department: 'Computer Science' },
-        { email: 'vikram.joshi@college.edu', name: 'Vikram Joshi', rollNumber: 'CS2024005', department: 'Computer Science' },
+        { email: 'rohan.gomes@fragnel.edu.in', name: 'Rohan Gomes', rollNumber: 'FYBSC001', department: 'Computer Science' },
+        { email: 'priya.pereira@fragnel.edu.in', name: 'Priya Pereira', rollNumber: 'FYBSC002', department: 'Computer Science' },
+        { email: 'akash.shetty@fragnel.edu.in', name: 'Akash Shetty', rollNumber: 'FYBSC003', department: 'Computer Science' },
+        { email: 'anita.rodrigues@fragnel.edu.in', name: 'Anita Rodrigues', rollNumber: 'FYBCOM001', department: 'Commerce' },
+        { email: 'nikhil.desai@fragnel.edu.in', name: 'Nikhil Desai', rollNumber: 'FYBCOM002', department: 'Commerce' },
+        { email: 'kavita.pawar@fragnel.edu.in', name: 'Kavita Pawar', rollNumber: 'SYBSC001', department: 'Computer Science' },
     ];
 
     for (const s of students) {
@@ -91,107 +96,104 @@ async function main() {
     }
 
     // =================================
-    // EXAMS
+    // EXAMS - Ready for testing
     // =================================
 
-    // Exam 1: Data Structures (Published - Ready to take)
-    let exam1 = await prisma.exam.findFirst({ where: { examCode: 'DSA101' } });
+    // Exam 1: Computer Fundamentals (Published - Ready to take!)
+    let exam1 = await prisma.exam.findFirst({ where: { examCode: 'COMP01' } });
     if (!exam1) {
         exam1 = await prisma.exam.create({
             data: {
-                examCode: 'DSA101',
-                title: 'Data Structures Mid-Term',
-                description: 'Mid-term examination covering Arrays, Linked Lists, Stacks, and Queues',
-                durationMin: 45,
+                examCode: 'COMP01',
+                title: 'Computer Fundamentals - Unit Test 1',
+                description: 'Basic concepts of computers, input/output devices, and software',
+                durationMin: 30,
                 template: 'mcq',
-                professorId: profCS.id,
+                professorId: faculty1.id,
                 status: 'PUBLISHED'
             }
         });
     }
-    console.log('\n✓ Exam:', exam1.title, `(Code: ${exam1.examCode}) - PUBLISHED`);
+    console.log('\n✓ Exam:', exam1.title, `(Code: ${exam1.examCode}) - PUBLISHED ✅ READY`);
 
-    // Exam 1 Questions
-    const dsaQuestions = [
-        { text: 'What is the time complexity of accessing an element in an array by index?', options: ['O(1)', 'O(n)', 'O(log n)', 'O(n²)'], correctIdx: 0 },
-        { text: 'Which data structure uses LIFO (Last In First Out) principle?', options: ['Queue', 'Stack', 'Array', 'Linked List'], correctIdx: 1 },
-        { text: 'What is the time complexity of inserting an element at the beginning of a singly linked list?', options: ['O(1)', 'O(n)', 'O(log n)', 'O(n²)'], correctIdx: 0 },
-        { text: 'Which of the following is NOT a linear data structure?', options: ['Array', 'Stack', 'Tree', 'Queue'], correctIdx: 2 },
-        { text: 'In a circular queue, when is the queue full?', options: ['front == rear', 'front == (rear + 1) % size', 'rear == size - 1', 'front == 0'], correctIdx: 1 },
-        { text: 'What is the minimum number of stacks required to implement a queue?', options: ['1', '2', '3', '4'], correctIdx: 1 },
-        { text: 'Which operation takes O(n) time in a singly linked list?', options: ['Insert at head', 'Delete from head', 'Search for an element', 'Check if empty'], correctIdx: 2 },
-        { text: 'What is the space complexity of an array of size n?', options: ['O(1)', 'O(n)', 'O(log n)', 'O(n²)'], correctIdx: 1 },
-        { text: 'Which data structure is best for implementing recursion internally?', options: ['Queue', 'Array', 'Stack', 'Linked List'], correctIdx: 2 },
-        { text: 'What is a disadvantage of arrays compared to linked lists?', options: ['Random access', 'Fixed size', 'Cache locality', 'Simpler implementation'], correctIdx: 1 },
+    const compQuestions = [
+        { text: 'What does CPU stand for?', options: ['Central Processing Unit', 'Computer Personal Unit', 'Central Program Utility', 'Control Processing Unit'], correctIdx: 0 },
+        { text: 'Which of the following is an input device?', options: ['Monitor', 'Printer', 'Keyboard', 'Speaker'], correctIdx: 2 },
+        { text: 'RAM stands for:', options: ['Random Access Memory', 'Read Access Memory', 'Run Access Memory', 'Random Available Memory'], correctIdx: 0 },
+        { text: 'Which is NOT an operating system?', options: ['Windows', 'Linux', 'Microsoft Word', 'macOS'], correctIdx: 2 },
+        { text: '1 KB equals how many bytes?', options: ['1000 bytes', '1024 bytes', '512 bytes', '2048 bytes'], correctIdx: 1 },
+        { text: 'Which device is used for permanent storage?', options: ['RAM', 'Cache', 'Hard Disk', 'Register'], correctIdx: 2 },
+        { text: 'USB stands for:', options: ['Universal Serial Bus', 'Unified System Bus', 'Universal System Backup', 'United Serial Block'], correctIdx: 0 },
+        { text: 'Which is an example of system software?', options: ['MS Word', 'Chrome', 'Operating System', 'Excel'], correctIdx: 2 },
+        { text: 'The brain of a computer is:', options: ['Monitor', 'CPU', 'RAM', 'Hard Disk'], correctIdx: 1 },
+        { text: 'What type of software is Google Chrome?', options: ['System Software', 'Application Software', 'Firmware', 'Utility Software'], correctIdx: 1 },
     ];
 
     await prisma.question.deleteMany({ where: { examId: exam1.id } });
-    for (let i = 0; i < dsaQuestions.length; i++) {
+    for (let i = 0; i < compQuestions.length; i++) {
         await prisma.question.create({
             data: {
                 examId: exam1.id,
-                text: dsaQuestions[i].text,
-                optionsJson: JSON.stringify(dsaQuestions[i].options),
-                correctIdx: dsaQuestions[i].correctIdx,
+                text: compQuestions[i].text,
+                optionsJson: JSON.stringify(compQuestions[i].options),
+                correctIdx: compQuestions[i].correctIdx,
                 order: i + 1
             }
         });
     }
-    console.log(`  └─ Added ${dsaQuestions.length} questions`);
+    console.log(`  └─ Added ${compQuestions.length} questions`);
 
-    // Exam 2: DBMS (Published)
-    let exam2 = await prisma.exam.findFirst({ where: { examCode: 'DBMS02' } });
+    // Exam 2: Business Studies (Published)
+    let exam2 = await prisma.exam.findFirst({ where: { examCode: 'BCOM01' } });
     if (!exam2) {
         exam2 = await prisma.exam.create({
             data: {
-                examCode: 'DBMS02',
-                title: 'Database Management Systems Quiz',
-                description: 'Quiz on SQL, Normalization, and ER Diagrams',
-                durationMin: 30,
+                examCode: 'BCOM01',
+                title: 'Business Studies Quiz',
+                description: 'Introduction to Business, Commerce, and Trade',
+                durationMin: 20,
                 template: 'mcq',
-                professorId: profCS.id,
+                professorId: faculty2.id,
                 status: 'PUBLISHED'
             }
         });
     }
-    console.log('✓ Exam:', exam2.title, `(Code: ${exam2.examCode}) - PUBLISHED`);
+    console.log('✓ Exam:', exam2.title, `(Code: ${exam2.examCode}) - PUBLISHED ✅`);
 
-    const dbmsQuestions = [
-        { text: 'Which SQL clause is used to filter rows?', options: ['SELECT', 'FROM', 'WHERE', 'ORDER BY'], correctIdx: 2 },
-        { text: 'What does ACID stand for in database transactions?', options: ['Atomicity, Consistency, Isolation, Durability', 'Access, Control, Identity, Data', 'Add, Create, Insert, Delete', 'All, Columns, In, Database'], correctIdx: 0 },
-        { text: 'Which normal form eliminates transitive dependencies?', options: ['1NF', '2NF', '3NF', 'BCNF'], correctIdx: 2 },
-        { text: 'What is a primary key?', options: ['Any column', 'A unique identifier for each row', 'Foreign reference', 'Index column'], correctIdx: 1 },
-        { text: 'Which SQL command is used to add new rows?', options: ['UPDATE', 'INSERT', 'CREATE', 'ALTER'], correctIdx: 1 },
-        { text: 'What does the JOIN operation do?', options: ['Deletes rows', 'Combines rows from two tables', 'Creates a new table', 'Updates values'], correctIdx: 1 },
-        { text: 'Which constraint ensures a column cannot have NULL values?', options: ['UNIQUE', 'PRIMARY KEY', 'NOT NULL', 'CHECK'], correctIdx: 2 },
-        { text: 'What is a foreign key?', options: ['Primary key of same table', 'Reference to primary key of another table', 'Unique column', 'Index column'], correctIdx: 1 },
+    const bcomQuestions = [
+        { text: 'Commerce includes:', options: ['Trade only', 'Trade and aids to trade', 'Industry only', 'Agriculture only'], correctIdx: 1 },
+        { text: 'Which is NOT an aid to trade?', options: ['Banking', 'Insurance', 'Farming', 'Transport'], correctIdx: 2 },
+        { text: 'What is the main objective of a business?', options: ['Social service', 'Profit earning', 'Employment', 'Charity'], correctIdx: 1 },
+        { text: 'Which type of business has unlimited liability?', options: ['Company', 'Sole Proprietorship', 'Cooperative', 'Corporation'], correctIdx: 1 },
+        { text: 'GST stands for:', options: ['General Service Tax', 'Goods and Services Tax', 'Government Sales Tax', 'Global Standard Tax'], correctIdx: 1 },
+        { text: 'E-commerce refers to:', options: ['Electronic Commerce', 'Easy Commerce', 'Economic Commerce', 'Export Commerce'], correctIdx: 0 },
     ];
 
     await prisma.question.deleteMany({ where: { examId: exam2.id } });
-    for (let i = 0; i < dbmsQuestions.length; i++) {
+    for (let i = 0; i < bcomQuestions.length; i++) {
         await prisma.question.create({
             data: {
                 examId: exam2.id,
-                text: dbmsQuestions[i].text,
-                optionsJson: JSON.stringify(dbmsQuestions[i].options),
-                correctIdx: dbmsQuestions[i].correctIdx,
+                text: bcomQuestions[i].text,
+                optionsJson: JSON.stringify(bcomQuestions[i].options),
+                correctIdx: bcomQuestions[i].correctIdx,
                 order: i + 1
             }
         });
     }
-    console.log(`  └─ Added ${dbmsQuestions.length} questions`);
+    console.log(`  └─ Added ${bcomQuestions.length} questions`);
 
-    // Exam 3: Mathematics (Draft - for testing exam creation)
-    let exam3 = await prisma.exam.findFirst({ where: { examCode: 'MATH03' } });
+    // Exam 3: Mathematics (Draft)
+    let exam3 = await prisma.exam.findFirst({ where: { examCode: 'MATH01' } });
     if (!exam3) {
         exam3 = await prisma.exam.create({
             data: {
-                examCode: 'MATH03',
-                title: 'Calculus Quiz (Draft)',
-                description: 'Quiz on Differentiation and Integration',
-                durationMin: 20,
+                examCode: 'MATH01',
+                title: 'Mathematics Mid-Term (Draft)',
+                description: 'Algebra and Calculus basics',
+                durationMin: 45,
                 template: 'mcq',
-                professorId: profMath.id,
+                professorId: faculty3.id,
                 status: 'DRAFT'
             }
         });
@@ -203,10 +205,9 @@ async function main() {
     // =================================
 
     const devices = [
-        { hostname: 'LAB-PC-01', macAddress: 'AA:BB:CC:DD:EE:01', approved: true },
-        { hostname: 'LAB-PC-02', macAddress: 'AA:BB:CC:DD:EE:02', approved: true },
-        { hostname: 'LAB-PC-03', macAddress: 'AA:BB:CC:DD:EE:03', approved: true },
-        { hostname: 'DEMO-LAPTOP', macAddress: 'FF:FF:FF:00:00:01', approved: true },
+        { hostname: 'LAB-A-PC01', macAddress: 'AA:BB:CC:DD:EE:01', approved: true },
+        { hostname: 'LAB-A-PC02', macAddress: 'AA:BB:CC:DD:EE:02', approved: true },
+        { hostname: 'LAB-B-PC01', macAddress: 'AA:BB:CC:DD:EE:03', approved: true },
     ];
 
     for (const d of devices) {
@@ -222,32 +223,36 @@ async function main() {
     // SUMMARY
     // =================================
 
-    console.log('\n' + '='.repeat(50));
-    console.log('✅ SEEDING COMPLETE!');
-    console.log('='.repeat(50));
+    console.log('\n' + '═'.repeat(60));
+    console.log('  ✅ FR. AGNEL COLLEGE - DATABASE READY');
+    console.log('═'.repeat(60));
 
-    console.log('\n📋 LOGIN CREDENTIALS:\n');
-    console.log('┌─────────────┬──────────────────────────────┬──────────────┬─────────────┐');
-    console.log('│ Role        │ Email                        │ Password     │ Roll Number │');
-    console.log('├─────────────┼──────────────────────────────┼──────────────┼─────────────┤');
-    console.log('│ Admin       │ admin@college.edu            │ admin123     │ -           │');
-    console.log('│ Professor   │ prof.sharma@college.edu      │ prof123      │ -           │');
-    console.log('│ Professor   │ prof.gupta@college.edu       │ prof123      │ -           │');
-    console.log('│ Student     │ rahul.kumar@college.edu      │ student123   │ CS2024001   │');
-    console.log('│ Student     │ priya.singh@college.edu      │ student123   │ CS2024002   │');
-    console.log('│ Student     │ amit.patel@college.edu       │ student123   │ CS2024003   │');
-    console.log('│ Student     │ sneha.verma@college.edu      │ student123   │ CS2024004   │');
-    console.log('│ Student     │ vikram.joshi@college.edu     │ student123   │ CS2024005   │');
-    console.log('└─────────────┴──────────────────────────────┴──────────────┴─────────────┘');
+    console.log('\n📋 FACULTY LOGIN:\n');
+    console.log('┌──────────────────────────────────┬──────────────┐');
+    console.log('│ Email                            │ Password     │');
+    console.log('├──────────────────────────────────┼──────────────┤');
+    console.log('│ prof.dsilva@fragnel.edu.in       │ faculty123   │');
+    console.log('│ prof.fernandes@fragnel.edu.in    │ faculty123   │');
+    console.log('│ prof.naik@fragnel.edu.in         │ faculty123   │');
+    console.log('└──────────────────────────────────┴──────────────┘');
 
-    console.log('\n📝 EXAM CODES:\n');
-    console.log('┌────────────┬───────────────────────────────────────┬───────────┐');
-    console.log('│ Code       │ Exam Title                            │ Status    │');
-    console.log('├────────────┼───────────────────────────────────────┼───────────┤');
-    console.log('│ DSA101     │ Data Structures Mid-Term              │ PUBLISHED │');
-    console.log('│ DBMS02     │ Database Management Systems Quiz      │ PUBLISHED │');
-    console.log('│ MATH03     │ Calculus Quiz (Draft)                 │ DRAFT     │');
-    console.log('└────────────┴───────────────────────────────────────┴───────────┘');
+    console.log('\n👨‍🎓 STUDENT LOGIN:\n');
+    console.log('┌──────────────────────────────────┬──────────────┬───────────┐');
+    console.log('│ Email                            │ Password     │ Roll No.  │');
+    console.log('├──────────────────────────────────┼──────────────┼───────────┤');
+    console.log('│ rohan.gomes@fragnel.edu.in       │ student123   │ FYBSC001  │');
+    console.log('│ priya.pereira@fragnel.edu.in     │ student123   │ FYBSC002  │');
+    console.log('│ anita.rodrigues@fragnel.edu.in   │ student123   │ FYBCOM001 │');
+    console.log('└──────────────────────────────────┴──────────────┴───────────┘');
+
+    console.log('\n📝 READY EXAM CODES (Students can enter these immediately):\n');
+    console.log('┌──────────┬─────────────────────────────────────┬───────────┐');
+    console.log('│ Code     │ Exam Title                          │ Status    │');
+    console.log('├──────────┼─────────────────────────────────────┼───────────┤');
+    console.log('│ COMP01   │ Computer Fundamentals - Unit Test 1 │ ✅ READY  │');
+    console.log('│ BCOM01   │ Business Studies Quiz               │ ✅ READY  │');
+    console.log('│ MATH01   │ Mathematics Mid-Term                │ 📝 DRAFT  │');
+    console.log('└──────────┴─────────────────────────────────────┴───────────┘');
 
     console.log('\n🌐 SERVER URL: http://localhost:3001\n');
 }
